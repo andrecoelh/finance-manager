@@ -1,3 +1,4 @@
+from datetime import datetime
 import csv
 import sys
 
@@ -20,20 +21,26 @@ def menu():
         except ValueError:
             print("Digite apenas números.")
 
-def save_receita(valor, descricao):
+def save_receita(valor, descricao, categoria, categorias, data):
     tipo = "Receita"
     with open("transactions.csv", "a", newline="", encoding="utf-8-sig") as file:
         writer = csv.writer(file, delimiter=";")
-        writer.writerow([tipo,descricao,f"{valor:.2f}"])
+        writer.writerow([data,tipo,descricao,f"{valor:.2f}",categorias[categoria - 1]])
 
 
-def save_despesa(valor, descricao, categoria, categorias):
+def save_despesa(valor, descricao, categoria, categorias, data, pagamento, qtd_parcelas):
     tipo = "Despesa"
     with open("transactions.csv", "a", newline="", encoding="utf-8-sig") as file:
         writer = csv.writer(file, delimiter=";")
-        writer.writerow([tipo,descricao,f"{valor:.2f}",categorias[categoria - 1]])
+        writer.writerow([data,tipo,descricao,f"{valor:.2f}",categorias[categoria - 1], pagamento, qtd_parcelas])
 
 def add_receita():
+    categorias = [
+        "Receitas Fixa", #Salário
+        "Receita Variável", #Pagamentos de terceiros
+        "Receita Extraordinária" #Presentes, doações
+    ]
+    data = get_date()
     while True:
         try:
             valor = float(input("Valor: "))
@@ -49,10 +56,22 @@ def add_receita():
 
     descricao = input("Descrição: ").strip()
 
+    for i, categoria in enumerate(categorias, start=1):
+            print(f"{i} - {categoria}")
+
+    while True:
+        try:
+            categoria = int(input("Categoria: "))
+            if 1 <= categoria <= len(categorias):
+                break
+            print("Categoria inválida")
+        except ValueError:
+            print("Digite apenas números.")
+
     if descricao == "":
         descricao = "Sem descrição"
 
-    save_receita(valor, descricao)
+    save_receita(valor, descricao,categoria, categorias, data)
 
 def add_despesa():
 
@@ -67,6 +86,7 @@ def add_despesa():
         "Financeiro / Dividas",
         "Eventuais / Extras"
     ]
+    data = get_date()
 
     while True:
         try:
@@ -102,8 +122,21 @@ def add_despesa():
 
         except ValueError:
             print("Digite apenas números.")
+    pagamento = get_payment_method()
+    if pagamento == "Crédito":
+        while True:
+            try:
+                qtd_parcelas = int(input("Quantidade de parcelas: "))
+                if qtd_parcelas <= 0:
+                    print("A quantidade de parcelas deve ser maior que zero.")
+                    continue
+                break
+            except ValueError:
+                print("Digite um valor válido.")
+    else:
+        qtd_parcelas = 1
 
-    save_despesa(valor, descricao, categoria, categorias)
+    save_despesa(valor, descricao, categoria, categorias, data, pagamento, qtd_parcelas)
 
 def show_summary():
     transactions = load_transactions()
@@ -137,19 +170,22 @@ def load_transactions():
 
             for row in reader:
 
-                if row[0] == "Receita":
+                if row[1] == "Receita":
                     transactions.append({
-                        "tipo": row[0],
-                        "descricao": row[1],
-                        "valor": float(row[2])
+                        "data": row[0],
+                        "tipo": row[1],
+                        "descricao": row[2],
+                        "valor": float(row[3]),
+                        "categoria": row[4]
                     })
 
-                elif row[0] == "Despesa":
+                elif row[1] == "Despesa":
                     transactions.append({
-                        "tipo": row[0],
-                        "descricao": row[1],
-                        "valor": float(row[2]),
-                        "categoria": row[3]
+                        "data": row[0],
+                        "tipo": row[1],
+                        "descricao": row[2],
+                        "valor": float(row[3]),
+                        "categoria": row[4]
                     })
 
     except FileNotFoundError:
@@ -186,6 +222,35 @@ def calculate_category(transactions):
             gastos[transaction["categoria"]] += transaction["valor"]
 
     return gastos
+
+def get_date():
+    while True:
+        data = input("Data(DD/MM/AAAA): ")
+
+        try: 
+            data = datetime.strptime(data, "%d/%m/%Y").date()
+            break
+        except ValueError:
+            print("Data inválida. Tente novamente.")
+    return data
+
+def get_payment_method():
+    pagamentos = ["Dinheiro", "Pix", "Débito", "Crédito"]
+
+    while True:
+        try:
+            for i, pagamento in enumerate(pagamentos, start=1):
+                print(f"{i} - {pagamento}")
+
+            opcao = int(input("Forma de pagamento: "))
+
+            if 1 <= opcao <= len(pagamentos):
+                return pagamentos[opcao - 1]
+
+            print("Opção inválida.")
+
+        except ValueError:
+            print("Digite apenas números.")
 
 def main():
     while True:
