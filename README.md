@@ -1,31 +1,109 @@
 # Finance Manager
 
-#### Video Demo: https://youtu.be/tNavcqQqUWA
+Finance Manager is a command-line application written in Python that helps users manage their personal finances. The application allows users to record income and expenses, store transactions in a CSV file, and generate financial summaries that include the current balance and expenses grouped by category.
 
-#### Description:
+Originally developed as the final project for **CS50's Introduction to Programming with Python**, this application is now an ongoing personal project. The goal is to continuously improve it by adding new features while applying software engineering best practices and expanding my Python knowledge.
 
-Finance Manager is a command-line application written in Python that helps users keep track of their personal finances. The program allows users to record both income and expenses, store them in a CSV file, and generate a financial summary showing the current balance and expenses grouped by category. The goal of this project was to create a simple but useful financial management tool while applying the programming concepts learned throughout CS50's Introduction to Programming with Python.
+## Features
 
-The application presents a menu with four options: add income, add an expense, display a financial summary, or exit the program. The menu is displayed continuously until the user chooses to quit, allowing multiple transactions to be recorded in a single session.
+* Record income transactions
+* Record expense transactions
+* Organize expenses into predefined categories
+* Store all transactions in a CSV file
+* Display the current financial balance
+* Show expenses grouped by category
+* Input validation for menu options and monetary values
+* Unit tests with `pytest`
 
-Income transactions require the user to enter a monetary value and a short description. Expense transactions require the same information, but also ask the user to select one of several predefined categories. These categories include Consumption Bills, Food, Transportation, Health and Wellness, Education, Leisure and Entertainment, Clothing and Personal Care, Financial/Debts, and Miscellaneous Expenses.
+## Expense Categories
 
-All transactions are stored in a file named `transactions.csv`. I decided to use a CSV file because it is lightweight, human-readable, and supported by Python's built-in `csv` module. This choice also allows the file to be opened directly in spreadsheet software such as Microsoft Excel.
+* Consumption Bills
+* Food
+* Transportation
+* Health and Wellness
+* Education
+* Leisure and Entertainment
+* Clothing and Personal Care
+* Financial/Debts
+* Miscellaneous Expenses
 
-The project consists of three files:
+## Project Structure
 
-- `project.py` contains the complete application. It includes the menu system, functions for saving transactions, loading transactions from the CSV file, calculating totals, calculating expenses by category, and displaying the financial summary.
-- `test_project.py` contains unit tests written with `pytest`. These tests verify that the functions responsible for calculating totals and category expenses return the expected results under different scenarios.
-- `requirements.txt` is included for compatibility with the project specification. Since this project only uses Python's standard library modules (`csv` and `sys`), there are no external dependencies to install.
+```text
+project.py          # Main application
+test_project.py     # Unit tests
+transactions.csv    # Transaction database (created automatically)
+requirements.txt    # Project dependencies
+```
 
-One important design decision was separating the program into multiple small functions instead of writing everything inside `main()`. Each function has a single responsibility. For example, `save_receita()` and `save_despesa()` are responsible only for writing data to the CSV file, while `load_transactions()` only reads the stored data and converts it into Python dictionaries. Functions such as `calculate_totals()` and `calculate_category()` perform only calculations, leaving `show_summary()` responsible for displaying the results. This separation makes the code easier to understand, maintain, and test.
+## Design Decisions
 
-The application also includes input validation. All numerical inputs are protected with `try` and `except` blocks to prevent the program from crashing if the user enters invalid data. The menu only accepts valid options, monetary values must be positive numbers, and expense categories must be selected from the available list. If the transactions file does not exist yet, the program handles the situation gracefully by displaying an empty summary instead of raising an exception.
+The application is divided into small, focused functions instead of placing all logic inside `main()`. Each function has a single responsibility, making the project easier to understand, maintain, and test.
 
-To represent transactions in memory, I chose to use a list of dictionaries. Each dictionary stores the information related to a single transaction, including its type, description, value, and category when applicable. I believe this structure is more readable than using nested lists because each field can be accessed by name instead of by index.
+Examples include:
 
-Although this project is intentionally simple, it demonstrates many of the concepts covered in CS50P, including functions, loops, conditionals, dictionaries, lists, file handling, CSV manipulation, exception handling, modular program design, and unit testing with `pytest`.
+* `save_income()` and `save_expense()` write transactions to the CSV file.
+* `load_transactions()` reads stored data.
+* `calculate_totals()` computes the current balance.
+* `calculate_category()` groups expenses by category.
+* `show_summary()` displays the financial report.
 
-In the future, I would like to expand this project by adding features such as editing or deleting transactions, filtering transactions by date, monthly financial reports, charts showing spending habits, and exporting summaries as PDF files. These improvements would transform the application into a more complete personal finance management system.
+Transactions are represented internally as a list of dictionaries, providing a simple and readable data structure.
 
-Overall, this project allowed me to combine several Python concepts into a practical application that can be used to manage personal finances from the command line while maintaining clean, organized, and modular code.
+## Data Storage
+
+All transactions are stored in a file named `transactions.csv`.
+
+CSV was chosen because it is lightweight, human-readable, supported by Python's built-in `csv` module, and can easily be opened in spreadsheet applications such as Microsoft Excel.
+
+## Running the Project
+
+Clone the repository:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/finance-manager.git
+```
+
+Enter the project directory:
+
+```bash
+cd finance-manager
+```
+
+Run the application:
+
+```bash
+python project.py
+```
+
+Run the tests:
+
+```bash
+pytest test_project.py
+```
+
+## Technologies
+
+* Python
+* CSV
+* Pytest
+* Git
+* GitHub
+
+## Roadmap
+
+The project is under active development. Planned features include:
+
+* Edit existing transactions
+* Delete transactions
+* Filter transactions by date
+* Monthly financial reports
+* Data visualization with charts
+* PDF export
+* Improved command-line interface
+* Database support
+* Graphical user interface (GUI)
+
+## Learning Goals
+
+This project serves both as a personal finance tool and as a long-term learning project. It allows me to practice Python programming, software design, testing, version control with Git, and gradually introduce more advanced technologies as the application evolves.
