@@ -1,4 +1,5 @@
 from datetime import datetime
+import pandas as pd
 import csv
 import sys
 
@@ -6,7 +7,7 @@ def menu():
     print("==== FINANCE MANAGER ====\n")
     print("1 - Adicionar Receita\n")
     print("2 - Adicionar Despesa\n")
-    print("3 - Resumo\n")
+    print("3 - Relatorios\n")
     print("4 - Sair\n")
 
     while True:
@@ -185,7 +186,9 @@ def load_transactions():
                         "tipo": row[1],
                         "descricao": row[2],
                         "valor": float(row[3]),
-                        "categoria": row[4]
+                        "categoria": row[4],
+                        "met_pagamento": row[5],
+                        "qtd_parcelas": row[6]
                     })
 
     except FileNotFoundError:
@@ -251,6 +254,18 @@ def get_payment_method():
 
         except ValueError:
             print("Digite apenas números.")
+
+def create_dataframe(): #Transformo minha lista de dicionários em um df e converto a "data" de string para data
+    transactions = load_transactions()
+
+    df = pd.DataFrame(transactions)
+
+    df["data"] = pd.to_datetime(
+        df["data"],
+        dayfirst=True
+    )
+
+    return df
 
 def main():
     while True:
