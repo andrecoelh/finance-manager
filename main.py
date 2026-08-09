@@ -4,20 +4,21 @@ import csv
 import sys
 
 def menu():
-    print("==== FINANCE MANAGER ====\n")
-    print("1 - Adicionar Receita\n")
-    print("2 - Adicionar Despesa\n")
-    print("3 - Relatorios\n")
-    print("4 - Sair\n")
+    print("==== FINANCE MANAGER ====")
+    print("1 - Adicionar Receita")
+    print("2 - Adicionar Despesa")
+    print("3 - Resumo")
+    print("4 - Relatórios")
+    print("5 - Sair")
 
     while True:
         try:
             option = int(input("Digite a opção desejada: "))
 
-            if option in [1, 2, 3, 4]:
+            if option in [1, 2, 3, 4, 5]:
                 return option
 
-            print("Digite uma opção entre 1 e 4.")
+            print("Digite uma opção entre 1 e 5.")
 
         except ValueError:
             print("Digite apenas números.")
@@ -140,16 +141,22 @@ def add_despesa():
     save_despesa(valor, descricao, categoria, categorias, data, pagamento, qtd_parcelas)
 
 def show_summary():
-    transactions = load_transactions()
+    df = create_dataframe()
 
-    if not transactions:
+    if df.empty:
         print("\nNenhuma transação cadastrada.\n")
         return
 
-    receitas, despesas = calculate_totals(transactions)
-    gastos = calculate_category(transactions)
+    receitas = df[df["tipo"] == "Receita"]["valor"].sum()
+    despesas = df[df["tipo"] == "Despesa"]["valor"].sum()
 
     saldo = receitas - despesas
+
+    gastos = (
+        df[df["tipo"] == "Despesa"]
+        .groupby("categoria")["valor"]
+        .sum()
+    )
 
     print("\n========== RESUMO ==========\n")
 
@@ -262,10 +269,81 @@ def create_dataframe(): #Transformo minha lista de dicionários em um df e conve
 
     df["data"] = pd.to_datetime(
         df["data"],
-        dayfirst=True
+        format="%Y-%m-%d"
     )
 
     return df
+
+def get_relatorio():
+    while True:
+        print("\n1 - Relatório Mensal")
+        print("2 - Relatório Anual")
+
+        try:
+            opcao = int(input("Opção desejada: "))
+
+        except ValueError:
+            print("Digite apenas um número.")
+            continue
+
+        if opcao == 1:
+            relatorio_mensal()
+            break
+
+        elif opcao == 2:
+            relatorio_anual()
+            break
+
+        else:
+            print("Opção inválida. Digite 1 ou 2.")
+
+def relatorio_mensal():
+    df = create_dataframe()
+    while True:
+        try:
+            mes = int(input("Digite o mês (1-12): "))
+            ano = int(input("Digite o ano: "))
+
+            if mes < 1 or mes > 12:
+                print("Mês inválido. Digite um valor entre 1 e 12.")
+                continue
+
+            break
+
+        except ValueError:
+            print("Digite apenas números.")
+
+    relatorio = df[
+        (df["data"].dt.month == mes) &
+        (df["data"].dt.year == ano)
+    ]
+
+    if relatorio.empty:
+        print("\nNão existem transações nesse período.")
+        return
+
+    print(f"\nRelatório de {mes:02d}/{ano}")
+    print(relatorio)
+
+def relatorio_anual():
+    df = create_dataframe()
+    while True:
+        try:
+            ano = int(input("Digite o ano: "))
+
+            relatorio = df[df["data"].dt.year == ano]
+
+            if relatorio.empty:
+                print("\nNão existem transações nesse período.")
+                continue
+
+            print(f"\nRelatório de {ano}")
+            print(relatorio)
+            return
+
+        except ValueError:
+            print("\nDigite um ano válido.")
+
 
 def main():
     while True:
@@ -277,6 +355,8 @@ def main():
         elif option == 3:
             show_summary()
         elif option == 4:
+            get_relatorio()
+        elif option == 5:
             sys.exit("Programa encerrado.")
         else:
             print("Opção inválida.")
