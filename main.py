@@ -1,5 +1,6 @@
 from datetime import datetime
 import pandas as pd
+from tabulate import tabulate
 import csv
 import sys
 
@@ -299,6 +300,7 @@ def get_relatorio():
 
 def relatorio_mensal():
     df = create_dataframe()
+
     while True:
         try:
             mes = int(input("Digite o mês (1-12): "))
@@ -322,11 +324,11 @@ def relatorio_mensal():
         print("\nNão existem transações nesse período.")
         return
 
-    print(f"\nRelatório de {mes:02d}/{ano}")
-    print(relatorio)
+    mostrar_relatorio(relatorio, f"RELATÓRIO DE {mes:02d}/{ano}")
 
 def relatorio_anual():
     df = create_dataframe()
+
     while True:
         try:
             ano = int(input("Digite o ano: "))
@@ -337,12 +339,81 @@ def relatorio_anual():
                 print("\nNão existem transações nesse período.")
                 continue
 
-            print(f"\nRelatório de {ano}")
-            print(relatorio)
+            mostrar_relatorio(relatorio, f"RELATÓRIO DE {ano}")
             return
 
         except ValueError:
             print("\nDigite um ano válido.")
+
+def mostrar_relatorio(relatorio, titulo):
+
+    print("\n" + "=" * 80)
+    print(f"{titulo:^80}")
+    print("=" * 80)
+
+    receitas = relatorio.loc[
+        relatorio["tipo"] == "Receita", "valor"
+    ].sum()
+
+    despesas = relatorio.loc[
+        relatorio["tipo"] == "Despesa", "valor"
+    ].sum()
+
+    saldo = receitas - despesas
+
+    print(f"\nReceitas: R$ {receitas:.2f}")
+    print(f"Despesas: R$ {despesas:.2f}")
+    print(f"Saldo:    R$ {saldo:.2f}")
+
+    tabela = relatorio[
+        [
+            "data",
+            "tipo",
+            "descricao",
+            "valor",
+            "categoria",
+            "met_pagamento",
+            "qtd_parcelas"
+        ]
+    ].rename(columns={
+        "data": "Data",
+        "tipo": "Tipo",
+        "descricao": "Descrição",
+        "valor": "Valor",
+        "categoria": "Categoria",
+        "met_pagamento": "Pagamento",
+        "qtd_parcelas": "Parcelas"
+    })
+
+    print(tabulate(
+        tabela,
+        headers="keys",
+        tablefmt="grid",
+        showindex=False
+    ))
+
+    # Gastos por categoria
+    gastos_categoria = (
+        relatorio[relatorio["tipo"] == "Despesa"]
+        .groupby("categoria")["valor"]
+        .sum()
+        .sort_values(ascending=False)
+    )
+
+    print("\n" + "-" * 80)
+    print("GASTOS POR CATEGORIA")
+    print("-" * 80)
+
+    tabela_categoria = gastos_categoria.reset_index()
+    tabela_categoria.columns = ["Categoria", "Total"]
+
+    print(tabulate(
+        tabela_categoria,
+        headers="keys",
+        tablefmt="grid",
+        showindex=False,
+        floatfmt=".2f"
+    ))
 
 
 def main():
