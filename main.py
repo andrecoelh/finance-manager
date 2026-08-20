@@ -4,6 +4,8 @@ from tabulate import tabulate
 import csv
 import sys
 
+FILE_NAME = "transactions.csv"
+
 def menu():
     print("==== FINANCE MANAGER ====")
     print("1 - Adicionar Receita")
@@ -26,14 +28,14 @@ def menu():
 
 def save_receita(valor, descricao, categoria, categorias, data):
     tipo = "Receita"
-    with open("transactions.csv", "a", newline="", encoding="utf-8-sig") as file:
+    with open(FILE_NAME, "a", newline="", encoding="utf-8-sig") as file:
         writer = csv.writer(file, delimiter=";")
         writer.writerow([data,tipo,descricao,f"{valor:.2f}",categorias[categoria - 1]])
 
 
 def save_despesa(valor, descricao, categoria, categorias, data, pagamento, qtd_parcelas):
     tipo = "Despesa"
-    with open("transactions.csv", "a", newline="", encoding="utf-8-sig") as file:
+    with open(FILE_NAME, "a", newline="", encoding="utf-8-sig") as file:
         writer = csv.writer(file, delimiter=";")
         writer.writerow([data,tipo,descricao,f"{valor:.2f}",categorias[categoria - 1], pagamento, qtd_parcelas])
 
@@ -174,7 +176,7 @@ def load_transactions():
     transactions = []
 
     try:
-        with open("transactions.csv", "r", newline="", encoding="utf-8-sig") as file:
+        with open(FILE_NAME, "r", newline="", encoding="utf-8-sig") as file:
             reader = csv.reader(file, delimiter=";")
 
             for row in reader:
@@ -269,9 +271,10 @@ def create_dataframe(): #Transformo minha lista de dicionários em um df e conve
     df = pd.DataFrame(transactions)
 
     df["data"] = pd.to_datetime(
-        df["data"],
-        format="%Y-%m-%d"
-    )
+    df["data"],
+    dayfirst=True,
+    errors="coerce"
+)
 
     return df
 
@@ -415,8 +418,16 @@ def mostrar_relatorio(relatorio, titulo):
         floatfmt=".2f"
     ))
 
+def create_file():
+    try:
+        with open(FILE_NAME, "x", encoding="utf-8-sig") as file:
+            pass
+    except FileExistsError:
+        pass
+
 
 def main():
+    create_file()
     while True:
         option = menu()
         if option == 1:
